@@ -14,13 +14,7 @@ public class MazeShell : MonoBehaviour
     public int x;
     public int z;
 
-    public void Initialize(int xPos, int zPos)
-    {
-        ShowAllWalls();
-    }
-
-
-    void ShowAllWalls()
+    public void ShowAllWalls()
     {
         leftWall.SetActive(true);
         rightWall.SetActive(true);
@@ -46,5 +40,13 @@ public class MazeShell : MonoBehaviour
                 bottonWall.SetActive(false);
                 break;
         }
+    }
+
+    void Initialaze(int Xpos, int Ypos)
+    {
+        x = Xpos;
+        z = Ypos;
+
+        ShowAllWalls();
     }
 }
