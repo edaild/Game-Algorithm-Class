@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class MazeBFS : MonoBehaviour
 {
-    public MazeShell mazeShell;
+
 
     int[,] map =
     {
@@ -29,16 +30,19 @@ public class MazeBFS : MonoBehaviour
        new Vector2Int(0, -1),
     };
 
-     void Start()
+    public GameObject wallPrefab;
+    public GameObject floorPrefab;
+    public float cellSize = 1;
+
+    void Start()
     {
         List<Vector2Int> path = FindpathBFS();
-        mazeShell = GetComponent<MazeShell>();
-
+        CreateMap();
     }
     List<Vector2Int> FindpathBFS()
     {
-        int w = map.GetLength(0);   // X Å©±â
-        int h = map.GetLength(1);   // y Å©±â
+        int w = map.GetLength(0);   // X Å©ï¿½ï¿½
+        int h = map.GetLength(1);   // y Å©ï¿½ï¿½
 
         visited = new bool[w, h];
         parent = new Vector2Int? [w, h];
@@ -49,29 +53,29 @@ public class MazeBFS : MonoBehaviour
         {
             Vector2Int cur = q.Dequeue();
 
-            // ¸ñÇ¥ µµÂø
+            // ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½
             if(cur == goal)
             {
-                Debug.Log("BFS: Goal µµÂø");
+                Debug.Log("BFS: Goal ï¿½ï¿½ï¿½ï¿½");
                 return ReconstructPath();
             }
 
-            // ³× ¹æÇâ ÀÌ¿ô Å½»ö
+            // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¿ï¿½ Å½ï¿½ï¿½
             foreach(var d in dirs)
             {
                 int nx = cur.x + d.x;
                 int ny = cur.y + d.y;
 
-                if (!InBounds(nx, ny)) continue;         // ÀüÃ¼ ¹Ù¿î´õ¸®
-                if (map[nx, ny] == 1) continue;          // º®
-                if (visited[nx, ny]) continue;           // ÀÌ¹Ì ¹æ¹®
+                if (!InBounds(nx, ny)) continue;         // ï¿½ï¿½Ã¼ ï¿½Ù¿ï¿½ï¿½ï¿½ï¿½
+                if (map[nx, ny] == 1) continue;          // ï¿½ï¿½
+                if (visited[nx, ny]) continue;           // ï¿½Ì¹ï¿½ ï¿½æ¹®
 
                 visited[nx, ny] = true;
                 parent[nx, ny] = cur;
                 q.Enqueue(new Vector2Int(nx, ny));
             }
         }
-        Debug.Log("BFS: °æ·Î ¾øÀ½");
+        Debug.Log("BFS: ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
         return null;
     }
 
@@ -84,14 +88,14 @@ public class MazeBFS : MonoBehaviour
     {
         List<Vector2Int> path = new List<Vector2Int>();
         Vector2Int? cur = goal;
-        // goal -> Start ¹æÇâÀ¸·Î parent µû¶ó°¡±â
+        // goal -> Start ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ parent ï¿½ï¿½ï¿½ó°¡±ï¿½
         while (cur.HasValue)
         {
             path.Add(cur.Value);
             cur = parent[cur.Value.x, cur.Value.y];
         }
-        path.Reverse();         // start -> goal ¼ø¼­·Î ¹ÝÀü
-        Debug.Log($"°æ·Î ±æÀÌ: {path.Count}");
+        path.Reverse();         // start -> goal ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        Debug.Log($"ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: {path.Count}");
         foreach (var p in path)
         {
             Debug.Log(p);
@@ -99,9 +103,34 @@ public class MazeBFS : MonoBehaviour
         return path;
     }
 
-    void CreateMap(int xpos , int ypos)
+    void CreateMap()
     {
-        mazeShell.ShowAllWalls();
+        int w = map.GetLength(0);
+        int h = map.GetLength(1);
+
+        for(int x = 0; x < w; x++)
+        {
+            for(int y = 0; y < h; y++)
+            {
+                float floorHeight = 0f;
+                Vector3 spawnPosition = new Vector3(x * cellSize, floorHeight, y * cellSize);
+
+                GameObject prefabToInstantiate = null;
+
+                if (map[x,y] == 1)
+                {
+                    prefabToInstantiate = wallPrefab;
+                }
+                else
+                {
+                    prefabToInstantiate = floorPrefab;
+                }
+                if (prefabToInstantiate != null)
+                {
+                    Instantiate(prefabToInstantiate, spawnPosition, Quaternion.identity);
+                }
+            }
+        }
     }
 
 }
